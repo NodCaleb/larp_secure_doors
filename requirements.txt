@@ -1,0 +1,30 @@
+Modules:
+
+1. Door
+2. Code lock
+3. RFID lock
+4. Button lock
+
+Comuunication - UART.
+Single power source.
+
+Door:
+Open (switch off light) by UART signal.
+Close by UART signal.
+Close by timer after some time.
+Settings: closing time.
+
+Code lock:
+Sends UART signal to open door in case of correctly entered code.
+Beep on buttons press.
+Success beep + failure beep.
+Possibility to make "broken" lock - any button press cause failure beep.
+Settings: code (one of 128 preset codes) and "broken".
+
+RFID lock:
+Sends UART signal to open door in case of allowed card read.
+Settings: which of preset cards will open the door (could be many).
+
+Button lock:
+Sends UART signal to open door.
+No settings.
