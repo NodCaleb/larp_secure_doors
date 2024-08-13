@@ -1,5 +1,6 @@
 #include "Keypad.h"
- 
+
+const byte buzzerPin = 18;
 const byte ROWS = 4; // number of rows
 const byte COLS = 3; // number of columns
 char keys[ROWS][COLS] = {
@@ -13,6 +14,7 @@ char code[4] = {'0', '0', '0', '0'};
 byte codeStep = 0;
 byte settings = 0;
 byte correctCodeIndex = 0;
+bool brokenLock = false;
 
 byte rowPins[ROWS] = {2, 7, 6, 4}; // row pinouts of the keypad
 byte colPins[COLS] = {3, 8, 5};    // column pinouts of the keypad
@@ -163,16 +165,19 @@ void setup()
   }
   settings = settings | !digitalRead(10);
 
-  Serial.print("Settings: ");
-  Serial.println(settings);
+  pinMode(buzzerPin, OUTPUT);
+
+  // Serial.print("Settings: ");
+  // Serial.println(settings);
 
   correctCodeIndex = settings & 0x7F; //Most significant bit reserved for "broken" lock
+  brokenLock = settings & (1 << 7);
 
-  Serial.print("Correct code: ");
-  for (int i = 0; i < 4; i++){
-    Serial.print(codes[correctCodeIndex][i]);
-  }
-  Serial.println();
+  // Serial.print("Correct code: ");
+  // for (int i = 0; i < 4; i++){
+  //   Serial.print(codes[correctCodeIndex][i]);
+  // }
+  // Serial.println();
 }
  
 void loop()
@@ -180,23 +185,30 @@ void loop()
   char key = keypad.getKey(); 
   if (key != NO_KEY){
 
-    code[codeStep] = key;
-    codeStep++;
-    Serial.print('>');
+    if (!brokenLock){
+      code[codeStep] = key;
+      codeStep++;
+      keypressBeep();
+    }
+    else{
+      errorBeep();
+    }    
 
     if (key == '#'){
       codeStep = 0;
-      Serial.println();
     }
 
     if (codeStep == 4){
-      printCode();
       codeStep = 0;
-      if (checkCode()) Serial.println('Y');
-      else Serial.println('N');
+      if (checkCode()){
+        Serial.println('Y');
+        successBeep();
+      }
+      else{
+        errorBeep();
+      }
     }
   }
-  //Serial.print(key);
 }
 
 void printCode(){
@@ -212,4 +224,16 @@ bool checkCode(){
     return false;
   }
   return true;
+}
+
+void keypressBeep(){
+  tone(buzzerPin, 1600, 100);
+}
+
+void successBeep(){
+  tone(buzzerPin, 1046, 600);
+}
+
+void errorBeep(){
+  tone(buzzerPin, 262, 600);
 }
