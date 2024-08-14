@@ -201,7 +201,7 @@ void loop()
     if (codeStep == 4){
       codeStep = 0;
       if (checkCode()){
-        Serial.println('Y');
+        Serial.println(0x01);
         successBeep();
       }
       else{
