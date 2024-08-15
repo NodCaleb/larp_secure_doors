@@ -1,3 +1,5 @@
+#define LED_PIN 2
+
 byte settings = 0;
 int doorCloseDelay = 0;
 
@@ -53,9 +55,23 @@ void setup()
   
   doorCloseDelay = doorDelays[settings & 0x1F];
 
+  Serial.println(doorCloseDelay);
+
+  pinMode(LED_PIN, OUTPUT);      // set LED pin as output
+  digitalWrite(LED_PIN, HIGH);    // switch off LED pin
+
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+  while (Serial.available() >= 0) {
+    char receivedData = Serial.read();   // read one byte from serial buffer and save to receivedData
+    // Serial.println(receivedData);
+    if (receivedData == '1') {
+      digitalWrite(LED_PIN, LOW); // switch LED On
+    }
+    else if (receivedData == '0') {
+      digitalWrite(LED_PIN, HIGH);  // switch LED Off
+    }
+  }
 }
