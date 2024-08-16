@@ -1,7 +1,13 @@
+#define USE_TIMER_1     true
+#define TIMER_INTERVAL_MS    1000
+
+#include "TimerInterrupt.h"
+
 #define LED_PIN 2
 
 byte settings = 0;
 int doorCloseDelay = 0;
+int doorTimer = 0;
 
 int doorDelays[32] = {
   10,
@@ -38,6 +44,22 @@ int doorDelays[32] = {
   7200
 };
 
+void timerHandler(void)
+{
+  if (doorTimer > 0) doorTimer--;
+  else closeDoor();
+}
+
+void openDoor(){
+  digitalWrite(LED_PIN, LOW);
+  doorTimer = doorCloseDelay;
+}
+
+void closeDoor(){
+  digitalWrite(LED_PIN, HIGH);
+  doorTimer = 0;
+}
+
 void setup()
 {
   Serial.begin(9600);
@@ -57,8 +79,12 @@ void setup()
 
   Serial.println(doorCloseDelay);
 
-  pinMode(LED_PIN, OUTPUT);      // set LED pin as output
-  digitalWrite(LED_PIN, HIGH);    // switch off LED pin
+  pinMode(LED_PIN, OUTPUT);
+
+  closeDoor();
+
+  ITimer1.init();
+  ITimer1.attachInterruptInterval(TIMER_INTERVAL_MS, timerHandler);
 
 }
 
@@ -68,10 +94,10 @@ void loop() {
     char receivedData = Serial.read();   // read one byte from serial buffer and save to receivedData
     // Serial.println(receivedData);
     if (receivedData == '1') {
-      digitalWrite(LED_PIN, LOW); // switch LED On
+      openDoor();
     }
     else if (receivedData == '0') {
-      digitalWrite(LED_PIN, HIGH);  // switch LED Off
+      closeDoor();
     }
   }
 }
