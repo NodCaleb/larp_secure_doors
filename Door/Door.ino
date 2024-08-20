@@ -1,3 +1,5 @@
+#include <Wire.h>
+
 #define USE_TIMER_1     true
 #define TIMER_INTERVAL_MS    1000
 
@@ -8,6 +10,7 @@
 byte settings = 0;
 int doorCloseDelay = 0;
 int doorTimer = 0;
+char command = ' '; //1 - open door, 0 - close door
 
 int doorDelays[32] = {
   10,
@@ -60,6 +63,11 @@ void closeDoor(){
   doorTimer = 0;
 }
 
+void receiveCommand(int bytes) {
+  command = Wire.read();    // read one character from the I2C
+  Serial.println(command);
+}
+
 void setup()
 {
   Serial.begin(9600);
@@ -86,18 +94,23 @@ void setup()
   ITimer1.init();
   ITimer1.attachInterruptInterval(TIMER_INTERVAL_MS, timerHandler);
 
+  // Start the I2C Bus as Slave on address 13
+  Wire.begin(13); 
+  // Attach a function to trigger when something is received.
+  Wire.onReceive(receiveCommand);
+
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  while (Serial.available() >= 0) {
-    char receivedData = Serial.read();   // read one byte from serial buffer and save to receivedData
-    // Serial.println(receivedData);
-    if (receivedData == '1') {
+
+  switch (command){
+    case '1':
       openDoor();
-    }
-    else if (receivedData == '0') {
+      command =  ' ';
+      break;
+    case '0':
       closeDoor();
-    }
+      command =  ' ';
+      break;
   }
 }
