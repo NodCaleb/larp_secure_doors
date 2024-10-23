@@ -1,4 +1,7 @@
 #include "Keypad.h"
+#include <Wire.h>
+
+#define I2C_ADDRESS 9
 
 const byte buzzerPin = 18;
 const byte ROWS = 4; // number of rows
@@ -173,11 +176,7 @@ void setup()
   correctCodeIndex = settings & 0x7F; //Most significant bit reserved for "broken" lock
   brokenLock = settings & (1 << 7);
 
-  // Serial.print("Correct code: ");
-  // for (int i = 0; i < 4; i++){
-  //   Serial.print(codes[correctCodeIndex][i]);
-  // }
-  // Serial.println();
+  Wire.begin();
 }
  
 void loop()
@@ -201,7 +200,7 @@ void loop()
     if (codeStep == 4){
       codeStep = 0;
       if (checkCode()){
-        Serial.println(0x01);
+        transmitOpenCommand();
         successBeep();
       }
       else{
@@ -209,6 +208,12 @@ void loop()
       }
     }
   }
+}
+
+void transmitOpenCommand(){
+    Wire.beginTransmission(I2C_ADDRESS);
+    Wire.write(0x01);
+    Wire.endTransmission();
 }
 
 void printCode(){

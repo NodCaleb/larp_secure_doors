@@ -1,5 +1,6 @@
 #include <Wire.h>
 
+#define I2C_ADDRESS 9
 #define USE_TIMER_1     true
 #define TIMER_INTERVAL_MS    1000
 
@@ -10,7 +11,7 @@
 byte settings = 0;
 int doorCloseDelay = 0;
 int doorTimer = 0;
-char command = ' '; //1 - open door, 0 - close door
+uint8_t command = 0x00; //0x01 - open door, 0x02 - close door
 
 int doorDelays[32] = {
   10,
@@ -64,8 +65,7 @@ void closeDoor(){
 }
 
 void receiveCommand(int bytes) {
-  command = Wire.read();    // read one character from the I2C
-  Serial.println(command);
+  command = Wire.read();
 }
 
 void setup()
@@ -95,7 +95,7 @@ void setup()
   ITimer1.attachInterruptInterval(TIMER_INTERVAL_MS, timerHandler);
 
   // Start the I2C Bus as Slave on address 13
-  Wire.begin(13); 
+  Wire.begin(I2C_ADDRESS); 
   // Attach a function to trigger when something is received.
   Wire.onReceive(receiveCommand);
 
@@ -104,13 +104,15 @@ void setup()
 void loop() {
 
   switch (command){
-    case '1':
+    case 0x01:
       openDoor();
-      command =  ' ';
       break;
-    case '0':
+    case 0x02:
       closeDoor();
-      command =  ' ';
       break;
   }
+
+  command =  0x00;
+
+  delay(100);
 }

@@ -1,10 +1,13 @@
+#include <SPI.h>
+#include <MFRC522.h>
+#include <Wire.h>
+
 #define RST_PIN         9        // Пин rfid модуля RST
 #define SS_PIN          10       // Пин rfid модуля SS
 #define USE_TIMER_1     true
 #define TIMER_INTERVAL_MS    1000
+#define I2C_ADDRESS 9
 
-#include <SPI.h>
-#include <MFRC522.h>
 #include "TimerInterrupt.h"
 
 MFRC522 rfid(SS_PIN, RST_PIN);   // Объект rfid модуля
@@ -34,6 +37,8 @@ void setup() {
   ITimer1.init();
   ITimer1.attachInterruptInterval(TIMER_INTERVAL_MS, timerHandler);
 
+  Wire.begin();
+
 }
 
 void loop() {
@@ -43,7 +48,9 @@ void loop() {
   if (rfidCooldown > 0) return;               // Cooldown для RFID
   // Работаем с RFID
   rfidCooldown = 3;
-  Serial.println(0x01);
+
+  transmitOpenCommand();
+
   // Serial.print("UID: ");
   // for (uint8_t i = 0; i < 4; i++) {           // Цикл на 4 итерации
   //   Serial.print("0x");                       // В формате HEX
@@ -51,4 +58,10 @@ void loop() {
   //   Serial.print(", ");
   // }
   // Serial.println("");
+}
+
+void transmitOpenCommand(){
+    Wire.beginTransmission(I2C_ADDRESS);
+    Wire.write(0x01);
+    Wire.endTransmission();
 }
