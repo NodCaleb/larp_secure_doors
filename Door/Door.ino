@@ -6,7 +6,7 @@
 
 #include "TimerInterrupt.h"
 
-#define LED_PIN 2
+#define LED_PIN 8
 
 byte settings = 0;
 int doorCloseDelay = 0;
@@ -64,10 +64,6 @@ void closeDoor(){
   doorTimer = 0;
 }
 
-void receiveCommand(int bytes) {
-  command = Wire.read();
-}
-
 void setup()
 {
   Serial.begin(9600);
@@ -83,7 +79,7 @@ void setup()
   }
   settings = settings | !digitalRead(10);
   
-  doorCloseDelay = doorDelays[settings & 0x1F];
+  doorCloseDelay = doorDelays[settings & 0x1F]; //Least significant 5 bits define delay in seconds - see in array
 
   Serial.println(doorCloseDelay);
 
@@ -97,7 +93,7 @@ void setup()
   // Start the I2C Bus as Slave on address 13
   Wire.begin(I2C_ADDRESS); 
   // Attach a function to trigger when something is received.
-  Wire.onReceive(receiveCommand);
+  Wire.onReceive(receiveEvent);
 
 }
 
@@ -115,4 +111,13 @@ void loop() {
   command =  0x00;
 
   delay(100);
+}
+
+// Function that executes whenever data is received from master
+void receiveEvent(int howMany) {
+  while (Wire.available()) {
+    uint8_t c = Wire.read();
+    if (c == 0x01) command = 0x01;
+    if (c == 0x02) command = 0x02;
+  }
 }
