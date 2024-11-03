@@ -3,6 +3,8 @@
 #define I2C_ADDRESS 9
 #define USE_TIMER_1     true
 #define TIMER_INTERVAL_MS    1000
+#define SETTING_FIRST_PIN 9
+#define SETTING_LAST_PIN 16
 
 #include "TimerInterrupt.h"
 
@@ -69,15 +71,15 @@ void setup()
   Serial.begin(9600);
 
   //Reading settings from slide switches
-  for (int p = 10; p <= 17; p++){
+  for (int p = SETTING_FIRST_PIN; p <= SETTING_LAST_PIN; p++){
     pinMode(p, INPUT_PULLUP);
   }
 
-  for (int p = 17; p > 10; p--){
+  for (int p = SETTING_LAST_PIN; p > SETTING_FIRST_PIN; p--){
     settings = settings | !digitalRead(p);
     settings = settings << 1;
   }
-  settings = settings | !digitalRead(10);
+  settings = settings | !digitalRead(SETTING_FIRST_PIN);
   
   doorCloseDelay = doorDelays[settings & 0x1F]; //Least significant 5 bits define delay in seconds - see in array
 

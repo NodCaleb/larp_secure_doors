@@ -2,8 +2,10 @@
 #include <Wire.h>
 
 #define I2C_ADDRESS 9
+#define SETTING_FIRST_PIN 9
+#define SETTING_LAST_PIN 16
 
-const byte buzzerPin = 18;
+const byte buzzerPin = 17;
 const byte ROWS = 4; // number of rows
 const byte COLS = 3; // number of columns
 char keys[ROWS][COLS] = {
@@ -158,15 +160,15 @@ void setup()
   Serial.begin(9600);
 
   //Reading settings from slide switches
-  for (int p = 10; p <= 17; p++){
+  for (int p = SETTING_FIRST_PIN; p <= SETTING_LAST_PIN; p++){
     pinMode(p, INPUT_PULLUP);
   }
 
-  for (int p = 17; p > 10; p--){
+  for (int p = SETTING_LAST_PIN; p > SETTING_FIRST_PIN; p--){
     settings = settings | !digitalRead(p);
     settings = settings << 1;
   }
-  settings = settings | !digitalRead(10);
+  settings = settings | !digitalRead(SETTING_FIRST_PIN);
 
   pinMode(buzzerPin, OUTPUT);
 
