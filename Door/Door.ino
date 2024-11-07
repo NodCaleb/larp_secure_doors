@@ -8,7 +8,9 @@
 
 #include "TimerInterrupt.h"
 
-#define LED_PIN 8
+#define R_PIN 6
+#define G_PIN 7
+#define B_PIN 8
 
 byte settings = 0;
 int doorCloseDelay = 0;
@@ -57,12 +59,16 @@ void timerHandler(void)
 }
 
 void openDoor(){
-  digitalWrite(LED_PIN, LOW);
+  digitalWrite(R_PIN, LOW);
+  digitalWrite(G_PIN, HIGH);
+  digitalWrite(B_PIN, LOW);
   doorTimer = doorCloseDelay;
 }
 
 void closeDoor(){
-  digitalWrite(LED_PIN, HIGH);
+  digitalWrite(R_PIN, HIGH);
+  digitalWrite(G_PIN, LOW);
+  digitalWrite(B_PIN, LOW);
   doorTimer = 0;
 }
 
@@ -85,7 +91,9 @@ void setup()
 
   Serial.println(doorCloseDelay);
 
-  pinMode(LED_PIN, OUTPUT);
+  pinMode(R_PIN, OUTPUT);
+  pinMode(G_PIN, OUTPUT);
+  pinMode(B_PIN, OUTPUT);
 
   closeDoor();
 
